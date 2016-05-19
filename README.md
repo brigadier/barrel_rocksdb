@@ -1,5 +1,5 @@
-erocksdb
-========
+barrel_erocksdb
+===============
 
 [![Build Status](https://travis-ci.org/barrel-db/barrel_rocksdb.svg?branch=master)](http://travis-ci.org/barrel-db/barrel_rocksdb)
 
