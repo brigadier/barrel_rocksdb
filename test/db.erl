@@ -13,7 +13,7 @@ flush_test() ->
 	ok = erocksdb:put(Db, <<"a">>, <<"1">>, []),
 	ok = erocksdb:flush(Db),
 	{ok, <<"1">>} = erocksdb:get(Db, <<"a">>, []),
-	erocksdb:close(Db).
+  erocksdb:close(Db, "test.db").
 
 
 randomstring(Len) ->
@@ -62,6 +62,6 @@ approximate_size_test() ->
 
 		?assert(Size5 >= 6000)
 	after
-		erocksdb:close(Db)
+		erocksdb:close(Db, "test.db")
 	end.
 

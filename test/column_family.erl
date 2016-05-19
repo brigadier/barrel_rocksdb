@@ -5,6 +5,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 
+
 basic_test() ->
     erocksdb:destroy("test.db", []),
     ColumnFamilies = [{"default", []}],
