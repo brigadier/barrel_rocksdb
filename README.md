@@ -20,16 +20,8 @@ Main differences are the following:
 
 ## Build Information
 
-$ rebar3 eunit
-
-## Status
-
-Passed all the tests derived from [eleveldb](https://github.com/basho/eleveldb)
+    $ rebar3 eunit
 
 ## License
 
 barrel_rocksdb's license is [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
-
-## Codebase
-
-This code is based on [basho’s eleveldb](https://github.com/basho/eleveldb).
