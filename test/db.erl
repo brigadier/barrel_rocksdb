@@ -3,9 +3,9 @@
 -include_lib("eunit/include/eunit.hrl").
 
 destroy_reopen(DbName, Options) ->
-	_ = erocksdb:destroy(DbName, []),
-	{ok, Db} = erocksdb:open(DbName, Options, []),
-	Db.
+  _ = erocksdb:destroy(DbName, []),
+  {ok, Db} = erocksdb:open(DbName, Options, []),
+  Db.
 
 
 open_test() -> [{open_test_Z(), l} || l <- lists:seq(1, 20)].
@@ -30,9 +30,12 @@ fold_test_Z() ->
   ok = erocksdb:put(Ref, <<"abc">>, <<"123">>, []),
   ok = erocksdb:put(Ref, <<"hij">>, <<"789">>, []),
   [{<<"abc">>, <<"123">>},
-    {<<"def">>, <<"456">>},
-    {<<"hij">>, <<"789">>}] = lists:reverse(erocksdb:fold(Ref, fun({K, V}, Acc) -> [{K, V} | Acc] end,
-    [], [])).
+   {<<"def">>, <<"456">>},
+   {<<"hij">>, <<"789">>}] = lists:reverse(erocksdb:fold(Ref,
+                                                         fun({K, V}, Acc) ->
+                                                             [{K, V} | Acc]
+                                                         end,
+                                                         [], [])).
 
 fold_keys_test() -> [{fold_keys_test_Z(), l} || l <- lists:seq(1, 20)].
 fold_keys_test_Z() ->
@@ -42,8 +45,8 @@ fold_keys_test_Z() ->
   ok = erocksdb:put(Ref, <<"abc">>, <<"123">>, []),
   ok = erocksdb:put(Ref, <<"hij">>, <<"789">>, []),
   [<<"abc">>, <<"def">>, <<"hij">>] = lists:reverse(erocksdb:fold_keys(Ref,
-    fun(K, Acc) -> [K | Acc] end,
-    [], [])).
+                                                                       fun(K, Acc) -> [K | Acc] end,
+                                                                       [], [])).
 
 destroy_test() -> [{destroy_test_Z(), l} || l <- lists:seq(1, 20)].
 destroy_test_Z() ->
@@ -60,23 +63,23 @@ compression_test_Z() ->
   CompressibleData = list_to_binary([0 || _X <- lists:seq(1,20)]),
   os:cmd("rm -rf /tmp/erocksdb.compress.0 /tmp/erocksdb.compress.1"),
   {ok, Ref0} = erocksdb:open("/tmp/erocksdb.compress.0", [{create_if_missing, true}],
-    [{compression, none}]),
+                             [{compression, none}]),
   [ok = erocksdb:put(Ref0, <<I:64/unsigned>>, CompressibleData, [{sync, true}]) ||
-    I <- lists:seq(1,10)],
+   I <- lists:seq(1,10)],
   {ok, Ref1} = erocksdb:open("/tmp/erocksdb.compress.1", [{create_if_missing, true}],
-    [{compression, snappy}]),
+                             [{compression, snappy}]),
   [ok = erocksdb:put(Ref1, <<I:64/unsigned>>, CompressibleData, [{sync, true}]) ||
-    I <- lists:seq(1,10)],
+   I <- lists:seq(1,10)],
   %% Check both of the LOG files created to see if the compression option was correctly
   %% passed down
   MatchCompressOption =
-    fun(File, Expected) ->
+  fun(File, Expected) ->
       {ok, Contents} = file:read_file(File),
       case re:run(Contents, "Options.compression: " ++ Expected) of
         {match, _} -> match;
         nomatch -> nomatch
       end
-    end,
+  end,
   Log0Option = MatchCompressOption("/tmp/erocksdb.compress.0/LOG", "0"),
   Log1Option = MatchCompressOption("/tmp/erocksdb.compress.1/LOG", "1"),
   ?assert(Log0Option =:= match andalso Log1Option =:= match).
@@ -94,7 +97,7 @@ close_fold_test_Z() ->
   {ok, Ref} = erocksdb:open("/tmp/erocksdb.close_fold.test", [{create_if_missing, true}], []),
   ok = erocksdb:put(Ref, <<"k">>,<<"v">>,[]),
   ?assertException(throw, {iterator_closed, ok}, % ok is returned by close as the acc
-    erocksdb:fold(Ref, fun(_,_A) -> erocksdb:close(Ref) end, undefined, [])).
+                   erocksdb:fold(Ref, fun(_,_A) -> erocksdb:close(Ref) end, undefined, [])).
 
 
 flush_test() ->
@@ -121,9 +124,9 @@ approximate_size_test() ->
 		N = 128,
 		random:seed(),
 		lists:foreach(fun(I) ->
-											ok = erocksdb:put(Db, key(I), randomstring(1024),[])
+											ok = erocksdb:put(Db, key(I), randomstring(1024),
+                                        [{sync, true}])
 									end, lists:seq(0, N)),
-		timer:sleep(500),
 		Start = key(50),
 		End = key(60),
 		Size = erocksdb:get_approximate_size(Db, Start, End, true),
@@ -135,12 +138,11 @@ approximate_size_test() ->
 		Start2 = key(500),
 		End2 = key(600),
 		Size3 = erocksdb:get_approximate_size(Db, Start2, End2, true),
-		io:format("size is ~p~n", [Size3]),
 		?assertEqual(0, Size3),
 		lists:foreach(fun(I) ->
-											ok = erocksdb:put(Db, key(1000 + I), randomstring(1024), [])
+											ok = erocksdb:put(Db, key(1000 + I), randomstring(1024),
+                                        [{sync, true}])
 									end, lists:seq(0, N)),
-		timer:sleep(500),
 
 		Size4 = erocksdb:get_approximate_size(Db, Start2, End2, true),
 		?assertEqual(0, Size4),
