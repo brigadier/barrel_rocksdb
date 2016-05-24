@@ -353,9 +353,6 @@ private:
     ItrObject & operator=(const ItrObject &); // no assignment
 };  // class ItrObject
 
-
-
-
 /**
  * Per Iterator object.  Created as erlang reference.
  */

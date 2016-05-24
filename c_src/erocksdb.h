@@ -58,11 +58,12 @@ ERL_NIF_TERM erocksdb_list_column_families(ErlNifEnv* env, int argc, const ERL_N
 ERL_NIF_TERM erocksdb_create_list_column_family(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
 ERL_NIF_TERM erocksdb_drop_list_column_family(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
 
-ERL_NIF_TERM erocksdb_get_updates_since(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
-ERL_NIF_TERM erocksdb_next_update(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+ERL_NIF_TERM erocksdb_updates_iterator(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
 ERL_NIF_TERM erocksdb_close_updates_iterator(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
-ERL_NIF_TERM erocksdb_write_update(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
-
+ERL_NIF_TERM erocksdb_close_next_binary_update(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+ERL_NIF_TERM erocksdb_write_binary_update(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+ERL_NIF_TERM erocksdb_next_update(ErlNifEnv* env, int argc, const ERL_NIF_TERM
+argv[]);
 }
 
 namespace erocksdb {
@@ -99,13 +100,13 @@ ERL_NIF_TERM ListColumnFamilies(ErlNifEnv* env, int argc, const ERL_NIF_TERM arg
 ERL_NIF_TERM CreateColumnFamily(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
 ERL_NIF_TERM DropColumnFamily(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
 
-ERL_NIF_TERM GetUpdatesSince(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
-ERL_NIF_TERM TransactionLogIteratorNext(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
-ERL_NIF_TERM TransactionLogIteratorClose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
-ERL_NIF_TERM WriteUpdate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+ERL_NIF_TERM UpdatesIterator(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+ERL_NIF_TERM UpdatesIteratorClose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+ERL_NIF_TERM NextBinaryUpdate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+ERL_NIF_TERM WriteBinaryUpdate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+ERL_NIF_TERM NextUpdate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
 
 } // namespace erocksdb
-
 
 
 ERL_NIF_TERM parse_db_option(ErlNifEnv* env, ERL_NIF_TERM item,

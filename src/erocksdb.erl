@@ -36,10 +36,11 @@
 -export([count/1, count/2, status/1, status/2, status/3]).
 -export([get_approximate_size/4]).
 -export([get_latest_sequence_number/1]).
--export([get_updates_since/2]).
--export([next_update/1]).
--export([write_update/3]).
+-export([updates_iterator/2]).
 -export([close_updates_iterator/1]).
+-export([next_binary_update/1]).
+-export([write_binary_update/3]).
+-export([next_update/1]).
 
 -export_type([db_handle/0,
               cf_handle/0,
@@ -477,18 +478,20 @@ get_latest_sequence_number(_DbHandle) ->
   erlang:nif_error({error, not_loaded}).
 
 
-get_updates_since(_DbHandle, _Since) ->
-  erlang:nif_error({error, not_loaded}).
-
-next_update(_Iterator) ->
+updates_iterator(_DbHandle, _Since) ->
   erlang:nif_error({error, not_loaded}).
 
 close_updates_iterator(_Iterator) ->
   erlang:nif_error({error, not_loaded}).
 
-write_update(_Iterator, _Update, _WriteOptions) ->
+next_binary_update(_Iterator) ->
   erlang:nif_error({error, not_loaded}).
 
+write_binary_update(_Iterator, _Update, _WriteOptions) ->
+  erlang:nif_error({error, not_loaded}).
+
+next_update(_Iterator) ->
+  erlang:nif_error({error, not_loaded}).
 
 %% @doc
 %% Return the approximate number of keys in the default column family.
