@@ -4,6 +4,7 @@
 
 destroy_reopen(DbName, Options) ->
   _ = erocksdb:destroy(DbName, []),
+  os:cmd("rm -rf " ++ DbName),
   {ok, Db} = erocksdb:open(DbName, Options, []),
   Db.
 
@@ -123,10 +124,12 @@ approximate_size_test() ->
 	try
 		N = 128,
 		random:seed(),
-		lists:foreach(fun(I) ->
-											ok = erocksdb:put(Db, key(I), randomstring(1024),
-                                        [{sync, true}])
-									end, lists:seq(0, N)),
+    Ops = lists:foldl(fun(I, Acc) ->
+                          [{put, key(I), randomstring(1024)} | Acc]
+                      end, [], lists:seq(0, N)),
+
+    erocksdb:write(Db, lists:reverse(Ops), [{sync, true}]),
+
 		Start = key(50),
 		End = key(60),
 		Size = erocksdb:get_approximate_size(Db, Start, End, true),
@@ -139,11 +142,11 @@ approximate_size_test() ->
 		End2 = key(600),
 		Size3 = erocksdb:get_approximate_size(Db, Start2, End2, true),
 		?assertEqual(0, Size3),
-		lists:foreach(fun(I) ->
-											ok = erocksdb:put(Db, key(1000 + I), randomstring(1024),
-                                        [{sync, true}])
-									end, lists:seq(0, N)),
 
+    Ops2 = lists:foldl(fun(I, Acc) ->
+                          [{put, key(1000+I), randomstring(1024)} | Acc]
+                      end, [], lists:seq(0, N)),
+    erocksdb:write(Db, lists:reverse(Ops2), [{sync, true}]),
 		Size4 = erocksdb:get_approximate_size(Db, Start2, End2, true),
 		?assertEqual(0, Size4),
 		Start3 = key(1000),
