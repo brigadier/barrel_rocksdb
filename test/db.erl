@@ -102,18 +102,18 @@ close_fold_test_Z() ->
 
 
 flush_test() ->
-	Db = destroy_reopen("test.db", [{create_if_missing, true}]),
-	ok = erocksdb:put(Db, <<"a">>, <<"1">>, []),
-	ok = erocksdb:flush(Db),
-	{ok, <<"1">>} = erocksdb:get(Db, <<"a">>, []),
+  Db = destroy_reopen("test.db", [{create_if_missing, true}]),
+  ok = erocksdb:put(Db, <<"a">>, <<"1">>, []),
+  ok = erocksdb:flush(Db),
+  {ok, <<"1">>} = erocksdb:get(Db, <<"a">>, []),
   erocksdb:close(Db).
 
 
 randomstring(Len) ->
-	list_to_binary([rand:uniform(95) || _I <- lists:seq(0, Len - 1)]).
+  list_to_binary([rand:uniform(95) || _I <- lists:seq(0, Len - 1)]).
 
 key(I) when is_integer(I) ->
-	<<I:128/unsigned>>.
+  <<I:128/unsigned>>.
 
 
 approximate_size_test() ->
@@ -122,39 +122,38 @@ approximate_size_test() ->
                        {write_buffer_size, 100000000},
                        {compression, none}]),
 
-	try
-		N = 128,
+  try
+    N = 128,
     rand:seed_s(exsplus),
     lists:foreach(fun(I) ->
-                      erocksdb:put(Db, key(I), randomstring(1024), [])
+                      ok = erocksdb:put(Db, key(I), randomstring(1024), [])
                   end, lists:seq(0, N)),
 
-		Start = key(50),
-		End = key(60),
-		Size = erocksdb:get_approximate_size(Db, Start, End, true),
-    io:format("size is ~p~n", [Size]),
-		?assert(Size >= 6000),
-		?assert(Size =< 204800),
-		Size2 = erocksdb:get_approximate_size(Db, Start, End, false),
-		?assertEqual(0, Size2),
-		Start2 = key(500),
-		End2 = key(600),
-		Size3 = erocksdb:get_approximate_size(Db, Start2, End2, true),
-		?assertEqual(0, Size3),
+    Start = key(50),
+    End = key(60),
+    Size = erocksdb:get_approximate_size(Db, Start, End, true),
+    ?assert(Size >= 6000),
+    ?assert(Size =< 204800),
+    Size2 = erocksdb:get_approximate_size(Db, Start, End, false),
+    ?assertEqual(0, Size2),
+    Start2 = key(500),
+    End2 = key(600),
+    Size3 = erocksdb:get_approximate_size(Db, Start2, End2, true),
+    ?assertEqual(0, Size3),
 
     lists:foreach(fun(I) ->
-                      erocksdb:put(Db, key(I+1000), randomstring(1024), [])
+                      ok = erocksdb:put(Db, key(I+1000), randomstring(1024), [])
                   end, lists:seq(0, N)),
 
-		Size4 = erocksdb:get_approximate_size(Db, Start2, End2, true),
-		?assertEqual(0, Size4),
-		Start3 = key(1000),
-		End3 = key(1020),
-		Size5 = erocksdb:get_approximate_size(Db, Start3, End3, true),
+    Size4 = erocksdb:get_approximate_size(Db, Start2, End2, true),
+    ?assertEqual(0, Size4),
+    Start3 = key(1000),
+    End3 = key(1020),
+    Size5 = erocksdb:get_approximate_size(Db, Start3, End3, true),
 
 
-		?assert(Size5 >= 6000)
-	after
-		erocksdb:close(Db)
-	end.
+    ?assert(Size5 >= 6000)
+  after
+    erocksdb:close(Db)
+  end.
 
