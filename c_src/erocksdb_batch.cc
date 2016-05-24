@@ -51,7 +51,7 @@ ErlNifResourceType *m_Batch_RESOURCE;
 void
 batch_resource_cleanup(ErlNifEnv *env, void *res)
 {
-    ((rocksdb::WriteBatch *)res)->Clear();
+
 }
 
 
