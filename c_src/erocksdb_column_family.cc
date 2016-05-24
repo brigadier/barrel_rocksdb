@@ -67,7 +67,7 @@ ListColumnFamilies(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
             result = enif_make_list_cell(env, cf_name, result);
         }
     } catch (const std::exception& e) {
-        // pass through and return nullptr
+        return enif_make_tuple2(env, ATOM_ERROR, enif_make_string(env, e.what(), ERL_NIF_LATIN1));
     }
 
     ERL_NIF_TERM result_out;
