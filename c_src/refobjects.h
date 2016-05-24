@@ -184,6 +184,7 @@ public:
     Mutex m_SnapshotMutex;                    //!< mutex protecting m_SnapshotList
     Mutex m_ColumnFamilyMutex;                //!< mutex ptotecting m_ColumnFamily
     Mutex m_TLogItrMutex;              //!< mutex ptotecting m_TransactionLogList
+
     std::list<class ItrObject *> m_ItrList;   //!< ItrObjects holding ref count to this
     std::list<class SnapshotObject *> m_SnapshotList;
     std::list<class ColumnFamilyObject *> m_ColumnFamilyList;

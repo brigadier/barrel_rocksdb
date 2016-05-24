@@ -108,7 +108,21 @@ static ErlNifFunc nif_funcs[] =
     {"iterators", 3, erocksdb::Iterators, ERL_NIF_DIRTY_JOB_IO_BOUND},
     {"iterators", 4, erocksdb::Iterators, ERL_NIF_DIRTY_JOB_IO_BOUND},
     {"iterator_close", 1, erocksdb::IteratorClose, ERL_NIF_DIRTY_JOB_IO_BOUND},
-    {"iterator_move", 2, erocksdb::IteratorMove, ERL_NIF_DIRTY_JOB_IO_BOUND}
+    {"iterator_move", 2, erocksdb::IteratorMove, ERL_NIF_DIRTY_JOB_IO_BOUND},
+
+    // Batch
+    {"batch", 0, erocksdb::NewBatch},
+    {"close_batch", 1, erocksdb::CloseBatch},
+    {"write_batch", 3, erocksdb::WriteBatch, ERL_NIF_DIRTY_JOB_IO_BOUND},
+    {"batchput", 3, erocksdb::PutBatch},
+    {"batchput", 4, erocksdb::PutBatch},
+    {"batchdelete", 2, erocksdb::DeleteBatch},
+    {"batchdelete", 3, erocksdb::DeleteBatch},
+    {"batchclear", 1, erocksdb::ClearBatch},
+    {"batchsavepoint", 1, erocksdb::BatchSetSavePoint},
+    {"batchrollback", 1, erocksdb::BatchRollbackToSavePoint},
+    {"batchcount", 1, erocksdb::BatchCount},
+    {"batchtolist", 1, erocksdb::BatchToList, ERL_NIF_DIRTY_JOB_CPU_BOUND}
 
 };
 
@@ -1308,6 +1322,7 @@ try
     erocksdb::SnapshotObject::CreateSnapshotObjectType(env);
     erocksdb::ColumnFamilyObject::CreateColumnFamilyObjectType(env);
     erocksdb::TLogItrObject::CreateTLogItrObjectType(env);
+    erocksdb::CreateBatchType(env);
 
 // must initialize atoms before processing options
 #define ATOM(Id, Value) { Id = enif_make_atom(env, Value); }

@@ -27,7 +27,7 @@
 
 cacheleak_test_() ->
     {timeout, 10*60, fun() ->
-                              [] = os:cmd("rm -rf /tmp/erocksdb.cacheleak.test"),
+                              os:cmd("rm -rf /tmp/erocksdb.cacheleak.test"),
                               Blobs = [{<<I:128/unsigned>>, compressible_bytes(10240)} ||
                                           I <- lists:seq(1, 10000)],
                               cacheleak_loop(10, Blobs, 500000)
@@ -41,7 +41,7 @@ compressible_bytes(Count) ->
 cacheleak_loop(0, _Blobs, _MaxFinalRSS) ->
     ok;
 cacheleak_loop(Count, Blobs, MaxFinalRSS) ->
-    %% We spawn a process to open a LevelDB instance and do a series of
+    %% We spawn a process to open a rocksdb instance and do a series of
     %% reads/writes to fill up the cache. When the process exits, the LevelDB
     %% ref will get GC'd and we can re-evaluate the memory footprint of the
     %% process to make sure everything got cleaned up as expected.

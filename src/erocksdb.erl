@@ -42,6 +42,18 @@
 -export([write_binary_update/3]).
 -export([next_update/1]).
 
+%% batch functions
+-export([batch/0,
+         close_batch/1,
+         write_batch/3,
+         batchput/3, batchput/4,
+         batchdelete/2, batchdelete/3,
+         batchclear/1,
+         batchsavepoint/1,
+         batchrollback/1,
+         batchcount/1,
+         batchtolist/1]).
+
 -export_type([db_handle/0,
               cf_handle/0,
               itr_handle/0,
@@ -492,6 +504,43 @@ write_binary_update(_Iterator, _Update, _WriteOptions) ->
 
 next_update(_Iterator) ->
   erlang:nif_error({error, not_loaded}).
+
+batch() ->
+    erlang:nif_error({error, not_loaded}).
+
+close_batch(_Batch) ->
+    erlang:nif_error({error, not_loaded}).
+
+write_batch(_DbHandle, _Batch, _WriteOptions) ->
+    erlang:nif_error({error, not_loaded}).
+
+
+batchput(_Batch, _Key, _Value) ->
+    erlang:nif_error({error, not_loaded}).
+
+batchput(_Batch, _ColumnFamily, _Key, _Value) ->
+    erlang:nif_error({error, not_loaded}).
+
+batchdelete(_Batch, _Key) ->
+    erlang:nif_error({error, not_loaded}).
+
+batchdelete(_Batch, _ColumnFamily, _Key) ->
+    erlang:nif_error({error, not_loaded}).
+
+batchcount(_Batch) ->
+    erlang:nif_error({error, not_loaded}).
+
+batchclear(_Batch) ->
+    erlang:nif_error({error, not_loaded}).
+
+batchsavepoint(_Batch) ->
+    erlang:nif_error({error, not_loaded}).
+
+batchrollback(_Batch) ->
+    erlang:nif_error({error, not_loaded}).
+
+batchtolist(_Batch) ->
+    erlang:nif_error({error, not_loaded}).
 
 %% @doc
 %% Return the approximate number of keys in the default column family.

@@ -377,6 +377,7 @@ DbObject::Shutdown() {
 
     } while (again);
 
+
 #endif
 
     RefDec();
@@ -1040,7 +1041,6 @@ TLogItrObject::Shutdown() {
 
     return;
 }   // TLogItrObject::CloseRequest
-
 
 
 }
