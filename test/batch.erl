@@ -106,6 +106,25 @@ rollback_test() ->
   ok = erocksdb:close_batch(Batch).
 
 
+rollback_over_savepoint_test() ->
+  {ok, Batch} = erocksdb:batch(),
+  ok = erocksdb:batchput(Batch, <<"a">>, <<"v1">>),
+  ok = erocksdb:batchput(Batch, <<"b">>, <<"v2">>),
+  ok = erocksdb:batchsavepoint(Batch),
+  ok = erocksdb:batchput(Batch, <<"c">>, <<"v3">>),
+  ?assertEqual(3, erocksdb:batchcount(Batch)),
+  ?assertEqual([{put, <<"a">>, <<"v1">>},
+                {put, <<"b">>, <<"v2">>},
+                {put, <<"c">>, <<"v3">>}], erocksdb:batchtolist(Batch)),
+  ok = erocksdb:batchrollback(Batch),
+  ?assertEqual(2, erocksdb:batchcount(Batch)),
+  ?assertEqual([{put, <<"a">>, <<"v1">>},
+                {put, <<"b">>, <<"v2">>}], erocksdb:batchtolist(Batch)),
+
+  ?assertMatch({error, _}, erocksdb:batchrollback(Batch)),
+
+  ok = erocksdb:close_batch(Batch).
+
 
 
 

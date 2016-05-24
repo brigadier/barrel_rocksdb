@@ -225,7 +225,10 @@ BatchRollbackToSavePoint(
     if(!enif_get_resource(env, argv[0], m_Batch_RESOURCE, (void **) &batch_ptr))
         return enif_make_badarg(env);
 
-    batch_ptr->RollbackToSavePoint();
+    rocksdb::Status status = batch_ptr->RollbackToSavePoint();
+    if(!status.ok())
+        return error_tuple(env, ATOM_ERROR, status);
+
     return ATOM_OK;
 }
 
