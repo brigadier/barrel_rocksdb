@@ -16,7 +16,7 @@ Main differences are the following:
 - Complete refactoring of the source code under the `erocksdb` namespace
 - add single put and single delete operations
 - add functions to handle the transactions logs
-- latest stable version of rocksdb
+- master version of rocksdb
 
 ## Build Information
 
