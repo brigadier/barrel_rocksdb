@@ -162,7 +162,6 @@ ERL_NIF_TERM ATOM_DISABLE_AUTO_COMPACTIONS;
 ERL_NIF_TERM ATOM_PURGE_REDUNDANT_KVS_WHILE_FLUSH;
 ERL_NIF_TERM ATOM_COMPACTION_STYLE;
 ERL_NIF_TERM ATOM_VERIFY_CHECKSUMS_IN_COMPACTION;
-ERL_NIF_TERM ATOM_FILTER_DELETES;
 ERL_NIF_TERM ATOM_MAX_SEQUENTIAL_SKIP_IN_ITERATIONS;
 ERL_NIF_TERM ATOM_INPLACE_UPDATE_SUPPORT;
 ERL_NIF_TERM ATOM_INPLACE_UPDATE_NUM_LOCKS;
@@ -672,10 +671,6 @@ ERL_NIF_TERM parse_db_option(ErlNifEnv* env, ERL_NIF_TERM item, rocksdb::Options
         {
             opts.verify_checksums_in_compaction = (option[1] == erocksdb::ATOM_TRUE);
         }
-        else if (option[0] == erocksdb::ATOM_FILTER_DELETES)
-        {
-            opts.filter_deletes = (option[1] == erocksdb::ATOM_TRUE);
-        }
         else if (option[0] == erocksdb::ATOM_MAX_SEQUENTIAL_SKIP_IN_ITERATIONS)
         {
             ErlNifUInt64 max_sequential_skip_in_iterations;
@@ -713,8 +708,6 @@ ERL_NIF_TERM parse_db_option(ErlNifEnv* env, ERL_NIF_TERM item, rocksdb::Options
                 opts.table_factory = std::shared_ptr<rocksdb::TableFactory>(rocksdb::NewPlainTableFactory());
                 opts.allow_mmap_reads = true;
                 opts.compression = rocksdb::CompressionType::kNoCompression;
-                opts.memtable_prefix_bloom_bits = 10000000;
-                opts.memtable_prefix_bloom_probes = 6;
                 opts.compaction_style = rocksdb::CompactionStyle::kCompactionStyleUniversal;
                 opts.compaction_options_universal.size_ratio = 10;
                 opts.compaction_options_universal.min_merge_width = 2;
@@ -880,9 +873,6 @@ ERL_NIF_TERM parse_cf_option(ErlNifEnv* env, ERL_NIF_TERM item, rocksdb::ColumnF
         else if (option[0] == erocksdb::ATOM_VERIFY_CHECKSUMS_IN_COMPACTION) {
             opts.verify_checksums_in_compaction = (option[1] == erocksdb::ATOM_TRUE);
         }
-        else if (option[0] == erocksdb::ATOM_FILTER_DELETES) {
-            opts.filter_deletes = (option[1] == erocksdb::ATOM_TRUE);
-        }
         else if (option[0] == erocksdb::ATOM_MAX_SEQUENTIAL_SKIP_IN_ITERATIONS) {
             ErlNifUInt64 max_sequential_skip_in_iterations;
             if (enif_get_uint64(env, option[1], &max_sequential_skip_in_iterations))
@@ -913,8 +903,6 @@ ERL_NIF_TERM parse_cf_option(ErlNifEnv* env, ERL_NIF_TERM item, rocksdb::ColumnF
                 opts.prefix_extractor = std::shared_ptr<const rocksdb::SliceTransform>(rocksdb::NewFixedPrefixTransform(10));
                 opts.table_factory = std::shared_ptr<rocksdb::TableFactory>(rocksdb::NewPlainTableFactory());
                 opts.compression = rocksdb::CompressionType::kNoCompression;
-                opts.memtable_prefix_bloom_bits = 10000000;
-                opts.memtable_prefix_bloom_probes = 6;
                 opts.compaction_style = rocksdb::CompactionStyle::kCompactionStyleUniversal;
                 opts.compaction_options_universal.size_ratio = 10;
                 opts.compaction_options_universal.min_merge_width = 2;
