@@ -11,7 +11,7 @@ customized for the [Barrel DB](https://barrel-db.org) project.
 
 Main differences are the following:
 
-- Erlang 18 and sup only
+- Erlang 19 and sup only
 - Use dirty-nifs
 - Complete refactoring of the source code under the `erocksdb` namespace
 - add single put and single delete operations
