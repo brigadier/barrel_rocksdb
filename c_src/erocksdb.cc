@@ -44,10 +44,6 @@
 #include "rocksdb/slice_transform.h"
 #include "rocksdb/utilities/checkpoint.h"
 
-#ifndef ERL_NIF_DIRTY_SCHEDULER_SUPPORT
-# error Requires dirty schedulers
-#endif
-
 #ifndef INCL_REFOBJECTS_H
     #include "refobjects.h"
 #endif
