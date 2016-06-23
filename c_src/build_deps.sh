@@ -84,7 +84,7 @@ case "$1" in
 
         sh $SCRIPT get-deps
         if [ ! -f rocksdb/librocksdb.a ]; then
-            (cd rocksdb && CXXFLAGS=-fPIC $MAKE static_lib)
+            (cd rocksdb && CXXFLAGS="-fPIC -flto -Os -s" $MAKE static_lib)
         fi
         ;;
 esac
