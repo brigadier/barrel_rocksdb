@@ -13,8 +13,12 @@ SCRIPT=$SCRIPTPATH/${0##*/}
 BASEDIR=$SCRIPTPATH
 BUILD_CONFIG=$BASEDIR/rocksdb/make_config.mk
 
-ROCKSDB_VSN=""
+ROCKSDB_VSN="4.5.1"
 SNAPPY_VSN="1.1.1"
+ZLIB_VSN="1.2.8"
+BZIP2_VSN="1.0.6"
+LZ4_VSN="r127"
+
 
 set -e
 
@@ -35,11 +39,13 @@ MAKE=${MAKE:-make}
 
 case "$1" in
     rm-deps)
-        rm -rf rocksdb system snappy-$SNAPPY_VSN rocksdb-$ROCKSDB_VSN.tar.gz
+        rm -rf rocksdb system snappy-$SNAPPY_VSN lz4-$LZ4_VSN bzip2-$BZIP2_VSN zlib-$ZLIB_VSN
+ rocksdb-$ROCKSDB_VSN.tar.gz
         ;;
 
     clean)
-        rm -rf system snappy-$SNAPPY_VSN
+        rm -rf system snappy-$SNAPPY_VSN lz4-$LZ4_VSN bzip2-$BZIP2_VSN zlib-$ZLIB_VSN
+
         if [ -d rocksdb ]; then
             (cd rocksdb && $MAKE clean)
         fi
@@ -57,13 +63,12 @@ case "$1" in
 
     get-deps)
         if [ ! -d rocksdb ]; then
-#            ROCKSDBURL="https://github.com/facebook/rocksdb/archive/v$ROCKSDB_VSN.tar.gz"
-#            ROCKSDBTARGZ="rocksdb-$ROCKSDB_VSN.tar.gz"
+            ROCKSDBURL="https://github.com/facebook/rocksdb/archive/v$ROCKSDB_VSN.tar.gz"
+            ROCKSDBTARGZ="rocksdb-$ROCKSDB_VSN.tar.gz"
             echo Downloading $ROCKSDBURL...
-#            curl -L -o $ROCKSDBTARGZ $ROCKSDBURL
-#            tar -xzf $ROCKSDBTARGZ
-#            mv rocksdb-$ROCKSDB_VSN rocksdb
-            git clone https://github.com/facebook/rocksdb
+            curl -L -o $ROCKSDBTARGZ $ROCKSDBURL
+            tar -xzf $ROCKSDBTARGZ
+            mv rocksdb-$ROCKSDB_VSN rocksdb
         fi
         ;;
 
@@ -76,7 +81,34 @@ case "$1" in
         if [ ! -f system/lib/libsnappy.a ]; then
             (cd snappy-$SNAPPY_VSN && $MAKE && $MAKE install)
         fi
+        
+	if [ ! -d lz4-$LZ4_VSN ]; then
+            tar -xzf lz4-$LZ4_VSN.tar.gz
+            (cd lz4-$LZ4_VSN/lib && make CFLAGS='-fPIC' all)
+        fi
 
+        if [ ! -f system/lib/liblz4.a ]; then
+            (cp lz4-$LZ4_VSN/lib/liblz4.a  system/lib/)
+        fi
+
+        if [ ! -d lbzip2-$BZIP2_VSN ]; then
+            tar -xzf bzip2-$BZIP2_VSN.tar.gz
+            (cd bzip2-$BZIP2_VSN && make libbz2.a CFLAGS='-fPIC -O2 -g -D_FILE_OFFSET_BITS=64')
+        fi
+
+        if [ ! -f system/lib/libbz2.a ]; then
+            (cp bzip2-$BZIP2_VSN/libbz2.a system/lib/)
+        fi
+
+        if [ ! -d zlib-$ZLIB_VSN ]; then
+            tar -xzf zlib-$ZLIB_VSN.tar.gz
+            (cd zlib-$ZLIB_VSN && CFLAGS='-fPIC' ./configure --static && make)
+        fi
+
+        if [ ! -f system/lib/libz.a ]; then
+            (cp zlib-$ZLIB_VSN/libz.a system/lib/)
+        fi
+        
         export CFLAGS="$CFLAGS -I $BASEDIR/system/include"
         export CXXFLAGS="$CXXFLAGS -I $BASEDIR/system/include"
         export LDFLAGS="$LDFLAGS -L$BASEDIR/system/lib"
@@ -84,7 +116,7 @@ case "$1" in
 
         sh $SCRIPT get-deps
         if [ ! -f rocksdb/librocksdb.a ]; then
-            (cd rocksdb && CXXFLAGS="-fPIC -flto -Os -s" $MAKE static_lib)
+            (cd rocksdb && CXXFLAGS=-fPIC $MAKE static_lib -j 3)
         fi
         ;;
 esac
