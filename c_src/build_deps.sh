@@ -14,7 +14,7 @@ BASEDIR=$SCRIPTPATH
 BUILD_CONFIG=$BASEDIR/rocksdb/make_config.mk
 
 ROCKSDB_VSN="4.5.1"
-#SNAPPY_VSN="1.1.1"
+SNAPPY_VSN="1.1.1"
 
 set -e
 
@@ -67,14 +67,14 @@ case "$1" in
         ;;
 
     *)
-#        if [ ! -d snappy-$SNAPPY_VSN ]; then
-#            tar -xzf snappy-$SNAPPY_VSN.tar.gz
-#            (cd snappy-$SNAPPY_VSN && export CXXFLAGS="-static-libstdc++  -fPIC" && ./configure --prefix=$BASEDIR/system --libdir=$BASEDIR/system/lib --with-pic)
-#        fi
-#
-#        if [ ! -f system/lib/libsnappy.a ]; then
-#            (cd snappy-$SNAPPY_VSN && $MAKE && $MAKE install)
-#        fi
+        if [ ! -d snappy-$SNAPPY_VSN ]; then
+            tar -xzf snappy-$SNAPPY_VSN.tar.gz
+            (cd snappy-$SNAPPY_VSN && export CXXFLAGS="-static-libstdc++  -fPIC" && ./configure --prefix=$BASEDIR/system --libdir=$BASEDIR/system/lib --with-pic)
+        fi
+
+        if [ ! -f system/lib/libsnappy.a ]; then
+            (cd snappy-$SNAPPY_VSN && $MAKE && $MAKE install)
+        fi
 
         export CFLAGS="$CFLAGS -I $BASEDIR/system/include"
         export CXXFLAGS="$CXXFLAGS -I $BASEDIR/system/include"
