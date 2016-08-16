@@ -83,7 +83,7 @@ static ErlNifFunc nif_funcs[] =
 
     // column families
     {"list_column_families", 2, erocksdb::ListColumnFamilies, ERL_NIF_DIRTY_JOB_IO_BOUND},
-    {"create_column_family", 3, erocksdb::CreateColumnFamily, ERL_NIF_DIRTY_JOB_IO_BOUND},
+    {"create_column_family", 4, erocksdb::CreateColumnFamily, ERL_NIF_DIRTY_JOB_IO_BOUND},
     {"drop_column_family", 1, erocksdb::DropColumnFamily, ERL_NIF_DIRTY_JOB_IO_BOUND},
 
     // snaptshot operation
@@ -931,18 +931,7 @@ ERL_NIF_TERM parse_cf_option(ErlNifEnv* env, ERL_NIF_TERM item, rocksdb::ColumnF
     }
     return erocksdb::ATOM_OK;
 }
-ERL_NIF_TERM
-parse_ttl(ErlNifEnv* env, ERL_NIF_TERM item,
-                    std::vector<int32_t>& ttls)
-{
-    int ttl;
-    if (enif_get_int(env, item, &ttl)) {
-        ttls.push_back(ttl);
-        return erocksdb::ATOM_OK;
-    } else {
-        return enif_make_badarg(env);
-    }
-}
+
 
 ERL_NIF_TERM
 parse_cf_descriptor(ErlNifEnv* env, ERL_NIF_TERM item,
@@ -1059,10 +1048,12 @@ OpenWithCf(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     tail = argv[3];
     while(enif_get_list_cell(env, tail, &head, &tail))
     {
-        ERL_NIF_TERM result = parse_ttl(env, head, ttls);
-        if (result != ATOM_OK)
-        {
-            return result;
+        int ttl;
+        if (enif_get_int(env, head, &ttl)) {
+            ttls.push_back(ttl);
+
+        } else {
+            return enif_make_badarg(env);
         }
     }
 

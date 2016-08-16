@@ -82,13 +82,16 @@ ERL_NIF_TERM
 CreateColumnFamily(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     ReferencePtr<DbObject> db_ptr;
+    int ttl;
+
     if(!enif_get_db(env, argv[0], &db_ptr))
         return enif_make_badarg(env);
 
     char cf_name[4096];
     rocksdb::ColumnFamilyOptions *opts = new rocksdb::ColumnFamilyOptions;
     if(!enif_get_string(env, argv[1], cf_name, sizeof(cf_name), ERL_NIF_LATIN1) ||
-       !enif_is_list(env, argv[2]))
+       !enif_is_list(env, argv[2]) ||
+       !enif_get_int(env, argv[3], &ttl))
     {
         return enif_make_badarg(env);
     }
@@ -101,7 +104,7 @@ CreateColumnFamily(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
     rocksdb::ColumnFamilyHandle* handle;
     rocksdb::Status status;
-    status = db_ptr->m_Db->CreateColumnFamily(*opts, cf_name, &handle);
+    status = db_ptr->m_Db->CreateColumnFamilyWithTtl(*opts, cf_name, &handle, ttl);
 
     if (status.ok())
     {

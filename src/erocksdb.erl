@@ -25,7 +25,7 @@
 -module(erocksdb).
 
 -export([open/3, open/4, open_with_cf/4, close/1]).
--export([list_column_families/2,create_column_family/3, drop_column_family/1]).
+-export([list_column_families/2,create_column_family/4, drop_column_family/1]).
 -export([snapshot/1, release_snapshot/1]).
 -export([put/4, put/5, delete/3, delete/4, write/3, get/3, get/4]).
 -export([iterator/2, iterator/3, iterators/3, iterators/4, iterator_move/2, iterator_close/1]).
@@ -249,11 +249,12 @@ list_column_families(_Name, _DbOpts) ->
 
 %% @doc
 %% Create a new column family
--spec(create_column_family(DBHandle, Name, CFOpts) ->
+-spec(create_column_family(DBHandle, Name, CFOpts, TTL) ->
              {ok, cf_handle()} | {error, any()} when DBHandle::db_handle(),
                                                      Name::string(),
-                                                     CFOpts::cf_options()).
-create_column_family(_DBHandle, _Name, _CFOpts) ->
+                                                     CFOpts::cf_options(),
+                                                     TTL::integer()).
+create_column_family(_DBHandle, _Name, _CFOpts, _TTL) ->
     erlang:nif_error({error, not_loaded}).
 
 %% @doc
