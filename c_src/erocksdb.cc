@@ -931,6 +931,18 @@ ERL_NIF_TERM parse_cf_option(ErlNifEnv* env, ERL_NIF_TERM item, rocksdb::ColumnF
     }
     return erocksdb::ATOM_OK;
 }
+ERL_NIF_TERM
+parse_ttl(ErlNifEnv* env, ERL_NIF_TERM item,
+                    std::vector<int32_t>& ttls)
+{
+    int ttl;
+    if (enif_get_int(env, item, &ttl)) {
+        ttls.push_back(ttl);
+        return erocksdb::ATOM_OK;
+    } else {
+        return enif_make_badarg(env);
+    }
+}
 
 ERL_NIF_TERM
 parse_cf_descriptor(ErlNifEnv* env, ERL_NIF_TERM item,
@@ -967,7 +979,7 @@ Open(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     char dir[4096];
     DbObject * db_ptr;
     rocksdb::DBWithTTL *db(0);
-    ErlNifSInt64 ttl;
+    int ttl;
     unsigned int dir_len;
 
     if(!enif_get_list_length(env, argv[0], &dir_len))
@@ -977,8 +989,7 @@ Open(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
     if(!enif_get_string(env, argv[0], dir, sizeof(dir), ERL_NIF_LATIN1) ||
        !enif_is_list(env, argv[1]) ||
-//       !enif_is_list(env, argv[2]) ||
-       !enif_get_int64(env, argv[2], &ttl))
+       !enif_get_int(env, argv[2], &ttl))
     {
         return enif_make_badarg(env);
     }
@@ -1017,11 +1028,11 @@ OpenWithCf(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     char db_name[4096];
     DbObject * db_ptr;
     rocksdb::DBWithTTL *db(0);
-    ErlNifSInt64 ttl;
+//    ErlNifSInt64 ttl;
 
 
     if(!enif_get_string(env, argv[0], db_name, sizeof(db_name), ERL_NIF_LATIN1) ||
-       !enif_is_list(env, argv[1]) || !enif_is_list(env, argv[2]) || !enif_get_int64(env, argv[3], &ttl))
+       !enif_is_list(env, argv[1]) || !enif_is_list(env, argv[2]) || !enif_is_list(env, argv[3]))
     {
         return enif_make_badarg(env);
     }
@@ -1042,7 +1053,19 @@ OpenWithCf(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         }
     }
 
-    std::vector<int32_t> ttls(column_families.size(), ttl);
+
+
+    std::vector<int32_t> ttls;
+    tail = argv[3];
+    while(enif_get_list_cell(env, tail, &head, &tail))
+    {
+        ERL_NIF_TERM result = parse_ttl(env, head, ttls);
+        if (result != ATOM_OK)
+        {
+            return result;
+        }
+    }
+
     std::vector<rocksdb::ColumnFamilyHandle*> handles;
     rocksdb::Status status = rocksdb::DBWithTTL::Open(*opts, db_name, column_families, &handles, &db, ttls);
 

@@ -222,6 +222,11 @@ open(_Name, _DbOpts, _TTL) ->
 open(Name, DbOpts, CfDescriptors, TTL) ->
     open(Name, DbOpts ++ CfDescriptors, TTL).
 
+open_with_cf(_Name, _DbOpts, CfDescriptors, TTL) when is_integer(TTL) ->
+    L = length(CfDescriptors),
+    TTL_L = lists:duplicate(L, TTL),
+    open_with_cf(_Name, _DbOpts, CfDescriptors, TTL_L);
+
 open_with_cf(_Name, _DbOpts, _CfDescriptors, _TTL) ->
     erlang:nif_error({error, not_loaded}).
 
