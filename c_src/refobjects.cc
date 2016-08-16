@@ -189,7 +189,7 @@ DbObject::CreateDbObjectType(
 
 DbObject *
 DbObject::CreateDbObject(
-        rocksdb::DB *Db,
+        rocksdb::DBWithTTL *Db,
         rocksdb::Options *Options) {
     DbObject *ret_ptr;
     void *alloc_ptr;
@@ -250,7 +250,7 @@ DbObject::DbObjectResourceCleanup(
 
 
 DbObject::DbObject(
-        rocksdb::DB *DbPtr,
+        rocksdb::DBWithTTL *DbPtr,
         rocksdb::Options *Options)
         : m_Db(DbPtr), m_DbOptions(Options) { }   // DbObject::DbObject
 

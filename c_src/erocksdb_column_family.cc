@@ -23,6 +23,7 @@
 #include "erocksdb.h"
 
 #include "rocksdb/db.h"
+#include "rocksdb/utilities/db_ttl.h"
 
 #ifndef INCL_REFOBJECTS_H
     #include "refobjects.h"
@@ -56,7 +57,7 @@ ListColumnFamilies(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
     std::vector<std::string> column_family_names;
 
-    rocksdb::Status status = rocksdb::DB::ListColumnFamilies(*opts, db_name, &column_family_names);
+    rocksdb::Status status = rocksdb::DBWithTTL::ListColumnFamilies(*opts, db_name, &column_family_names);
     if(!status.ok())
         return error_tuple(env, ATOM_ERROR_DB_OPEN, status);
 

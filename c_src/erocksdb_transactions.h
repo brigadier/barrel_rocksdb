@@ -19,6 +19,7 @@
 
 
 #include "rocksdb/db.h"
+#include "rocksdb/utilities/db_ttl.h"
 #include "rocksdb/write_batch.h"
 #include "rocksdb/transaction_log.h"
 

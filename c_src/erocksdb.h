@@ -24,6 +24,7 @@
 
 
 #include "rocksdb/db.h"
+#include "rocksdb/utilities/db_ttl.h"
 
 extern "C" {
 

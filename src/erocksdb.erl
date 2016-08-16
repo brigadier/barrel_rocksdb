@@ -24,7 +24,7 @@
 %%======================================================================
 -module(erocksdb).
 
--export([open/2, open/3, open_with_cf/3, close/1]).
+-export([open/3, open/4, open_with_cf/4, close/1]).
 -export([list_column_families/2,create_column_family/3, drop_column_family/1]).
 -export([snapshot/1, release_snapshot/1]).
 -export([put/4, put/5, delete/3, delete/4, write/3, get/3, get/4]).
@@ -210,18 +210,19 @@ init() ->
 
 %% @doc
 %% Open RocksDB with the defalut column family
--spec(open(Name, DBOpts, CFOpts) ->
+-spec(open(Name, DBOpts, CFOpts, TTL) ->
              {ok, db_handle()} | {error, any()} when Name::file:filename_all(),
                                                      DBOpts::db_options(),
-                                                     CFOpts::cf_options()).
+                                                     CFOpts::cf_options(),
+                                                     TTL::integer()).
 
-open(_Name, _DbOpts) ->
+open(_Name, _DbOpts, _TTL) ->
     erlang:nif_error({error, not_loaded}).
 
-open(Name, DbOpts, CfDescriptors) ->
-    open(Name, DbOpts ++ CfDescriptors).
+open(Name, DbOpts, CfDescriptors, TTL) ->
+    open(Name, DbOpts ++ CfDescriptors, TTL).
 
-open_with_cf(_Name, _DbOpts, _CfDescriptors) ->
+open_with_cf(_Name, _DbOpts, _CfDescriptors, _TTL) ->
     erlang:nif_error({error, not_loaded}).
 
 

@@ -28,6 +28,7 @@
 #endif
 
 #include "rocksdb/db.h"
+#include "rocksdb/utilities/db_ttl.h"
 
 ERL_NIF_TERM parse_read_option(ErlNifEnv* env, ERL_NIF_TERM item,
 rocksdb::ReadOptions& opts);

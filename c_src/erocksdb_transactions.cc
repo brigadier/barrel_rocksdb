@@ -25,6 +25,7 @@
 #include "erocksdb_kv.h"
 
 #include "rocksdb/db.h"
+#include "rocksdb/utilities/db_ttl.h"
 #include "rocksdb/write_batch.h"
 #include "rocksdb/transaction_log.h"
 
@@ -73,7 +74,7 @@ UpdatesIterator(
         return enif_make_badarg(env);
 
     rocksdb::SequenceNumber seq = since;
-    rocksdb::Status status = db_ptr->m_Db->GetUpdatesSince(seq, &iter);
+    rocksdb::Status status = db_ptr->m_Db->GetBaseDB()->GetUpdatesSince(seq, &iter);
 
     if(!status.ok())
         return error_tuple(env, ATOM_ERROR, status);
