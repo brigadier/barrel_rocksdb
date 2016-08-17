@@ -1,0 +1,41 @@
+diff -Naurp dev/db_ttl_impl.cc loc/db_ttl_impl.cc
+--- dev/db_ttl_impl.cc	2016-03-25 22:09:20.000000000 +0300
++++ loc/db_ttl_impl.cc	2016-08-17 18:16:35.000000000 +0300
+@@ -298,5 +298,21 @@ Iterator* DBWithTTLImpl::NewIterator(con
+   return new TtlIterator(db_->NewIterator(opts, column_family));
+ }
+ 
++Status DBWithTTLImpl::NewIterators(
++      const ReadOptions& options,
++      const std::vector<ColumnFamilyHandle*>& column_families,
++      std::vector<Iterator*>* iterators) {
++
++    std::vector<Iterator*> tempiterators;
++    Status result = db_->NewIterators(options, column_families, &tempiterators);
++    if (result == Status::OK()) {
++        for (auto it = begin (tempiterators); it != end (tempiterators); ++it) {
++            iterators->push_back(new TtlIterator(*it));
++        }
++    }
++    return result;
++}
++
++
+ }  // namespace rocksdb
+ #endif  // ROCKSDB_LITE
+diff -Naurp dev/db_ttl_impl.h loc/db_ttl_impl.h
+--- dev/db_ttl_impl.h	2016-03-25 22:09:20.000000000 +0300
++++ loc/db_ttl_impl.h	2016-08-17 18:17:06.000000000 +0300
+@@ -76,6 +76,12 @@ class DBWithTTLImpl : public DBWithTTL {
+   using StackableDB::NewIterator;
+   virtual Iterator* NewIterator(const ReadOptions& opts,
+                                 ColumnFamilyHandle* column_family) override;
++                                
++  using StackableDB::NewIterators;                                
++  virtual Status NewIterators(
++      const ReadOptions& options,
++      const std::vector<ColumnFamilyHandle*>& column_families,
++      std::vector<Iterator*>* iterators) override;                                
+ 
+   virtual DB* GetBaseDB() override { return db_; }
+ 
