@@ -74,6 +74,7 @@ UpdatesIterator(
         return enif_make_badarg(env);
 
     rocksdb::SequenceNumber seq = since;
+    //GetBaseDB() does not work well for ttl, it's there just for compiling without errors
     rocksdb::Status status = db_ptr->m_Db->GetBaseDB()->GetUpdatesSince(seq, &iter);
 
     if(!status.ok())

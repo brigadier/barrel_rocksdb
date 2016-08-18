@@ -5,7 +5,7 @@
 
 destroy_reopen(DbName, Options) ->
   _ = erocksdb:destroy(DbName, []),
-  {ok, Db} = erocksdb:open(DbName, Options, []),
+  {ok, Db} = erocksdb:open(DbName, Options, [], 10000),
   Db.
 
 close_destroy(Db, DbName) ->
