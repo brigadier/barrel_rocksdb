@@ -43,10 +43,8 @@
 #include "rocksdb/filter_policy.h"
 #include "rocksdb/slice_transform.h"
 #include "rocksdb/utilities/checkpoint.h"
-<<<<<<< HEAD
-=======
 #include "rocksdb/utilities/db_ttl.h"
->>>>>>> temp
+
 
 #ifndef INCL_REFOBJECTS_H
     #include "refobjects.h"

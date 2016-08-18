@@ -18,10 +18,6 @@ SNAPPY_VSN="1.1.1"
 ZLIB_VSN="1.2.8"
 BZIP2_VSN="1.0.6"
 LZ4_VSN="r127"
-<<<<<<< HEAD
-
-=======
->>>>>>> temp
 
 set -e
 
@@ -42,20 +38,11 @@ MAKE=${MAKE:-make}
 
 case "$1" in
     rm-deps)
-<<<<<<< HEAD
-        rm -rf rocksdb system snappy-$SNAPPY_VSN lz4-$LZ4_VSN bzip2-$BZIP2_VSN zlib-$ZLIB_VSN
- rocksdb-$ROCKSDB_VSN.tar.gz
-=======
         rm -rf rocksdb system snappy-$SNAPPY_VSN lz4-$LZ4_VSN bzip2-$BZIP2_VSN zlib-$ZLIB_VSN rocksdb-$ROCKSDB_VSN.tar.gz
->>>>>>> temp
         ;;
 
     clean)
         rm -rf system snappy-$SNAPPY_VSN lz4-$LZ4_VSN bzip2-$BZIP2_VSN zlib-$ZLIB_VSN
-<<<<<<< HEAD
-
-=======
->>>>>>> temp
         if [ -d rocksdb ]; then
             (cd rocksdb && $MAKE clean)
         fi
@@ -91,27 +78,7 @@ case "$1" in
         if [ ! -f system/lib/libsnappy.a ]; then
             (cd snappy-$SNAPPY_VSN && $MAKE && $MAKE install)
         fi
-        
-	if [ ! -d lz4-$LZ4_VSN ]; then
-            tar -xzf lz4-$LZ4_VSN.tar.gz
-            (cd lz4-$LZ4_VSN/lib && make CFLAGS='-fPIC' all)
-        fi
 
-        if [ ! -f system/lib/liblz4.a ]; then
-            (cp lz4-$LZ4_VSN/lib/liblz4.a  system/lib/)
-        fi
-
-        if [ ! -d lbzip2-$BZIP2_VSN ]; then
-            tar -xzf bzip2-$BZIP2_VSN.tar.gz
-            (cd bzip2-$BZIP2_VSN && make libbz2.a CFLAGS='-fPIC -O2 -g -D_FILE_OFFSET_BITS=64')
-        fi
-
-        if [ ! -f system/lib/libbz2.a ]; then
-            (cp bzip2-$BZIP2_VSN/libbz2.a system/lib/)
-        fi
-
-<<<<<<< HEAD
-=======
         if [ ! -d lz4-$LZ4_VSN ]; then
             tar -xzf lz4-$LZ4_VSN.tar.gz
             (cd lz4-$LZ4_VSN/lib && make CFLAGS='-fPIC' all)
@@ -130,7 +97,6 @@ case "$1" in
             (cp bzip2-$BZIP2_VSN/libbz2.a system/lib/)
         fi
 
->>>>>>> temp
         if [ ! -d zlib-$ZLIB_VSN ]; then
             tar -xzf zlib-$ZLIB_VSN.tar.gz
             (cd zlib-$ZLIB_VSN && CFLAGS='-fPIC' ./configure --static && make)
@@ -139,11 +105,7 @@ case "$1" in
         if [ ! -f system/lib/libz.a ]; then
             (cp zlib-$ZLIB_VSN/libz.a system/lib/)
         fi
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> temp
         export CFLAGS="$CFLAGS -I $BASEDIR/system/include"
         export CXXFLAGS="$CXXFLAGS -I $BASEDIR/system/include"
         export LDFLAGS="$LDFLAGS -L$BASEDIR/system/lib"
@@ -151,12 +113,8 @@ case "$1" in
 
         sh $SCRIPT get-deps
         if [ ! -f rocksdb/librocksdb.a ]; then
-<<<<<<< HEAD
-            (cd rocksdb && CXXFLAGS=-fPIC $MAKE static_lib -j 3)
-=======
             grep -q NewIterators rocksdb/utilities/ttl/db_ttl_impl.cc || patch -p1 -f -d rocksdb/utilities/ttl/ < ttl_iterators.patch
             (cd rocksdb && export CXXFLAGS="-static-libstdc++  -fPIC" && PORTABLE=1 $MAKE static_lib)
->>>>>>> temp
         fi
         ;;
 esac
