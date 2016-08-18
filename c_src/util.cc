@@ -24,6 +24,7 @@
 #endif
 
 #include "rocksdb/db.h"
+#include "rocksdb/utilities/db_ttl.h"
 
 // Erlang helpers:
 ERL_NIF_TERM error_einval(ErlNifEnv* env)

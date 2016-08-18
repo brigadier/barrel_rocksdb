@@ -14,10 +14,10 @@
 
 
 basic_test() ->
-  {ok, Db} = erocksdb:open("", []),
+  {ok, Db} = erocksdb:open("", [], 10000),
   ok = erocksdb:put(Db, <<"a">>, <<"1">>, []),
   ?assertEqual({ok, <<"1">>}, erocksdb:get(Db, <<"a">>, [])),
-  {ok, Db1} = erocksdb:open("", []),
+  {ok, Db1} = erocksdb:open("", [], 10000),
   ok = erocksdb:put(Db1, <<"a">>, <<"2">>, []),
   ?assertEqual({ok, <<"1">>}, erocksdb:get(Db, <<"a">>, [])),
   ?assertEqual({ok, <<"2">>}, erocksdb:get(Db1, <<"a">>, [])),
@@ -27,11 +27,11 @@ basic_test() ->
 
 
 with_mem_name_test() ->
-  {ok, Db} = erocksdb:open("mem", []),
+  {ok, Db} = erocksdb:open("mem", [], 10000),
   ?assert(filelib:is_dir("mem") =:= false),
   ok = erocksdb:put(Db, <<"a">>, <<"1">>, []),
   ?assertEqual({ok, <<"1">>}, erocksdb:get(Db, <<"a">>, [])),
-  {ok, Db1} = erocksdb:open("mem", []),
+  {ok, Db1} = erocksdb:open("mem", [], 10000),
   ok = erocksdb:put(Db1, <<"a">>, <<"2">>, []),
   ?assertEqual({ok, <<"1">>}, erocksdb:get(Db, <<"a">>, [])),
   ?assertEqual({ok, <<"2">>}, erocksdb:get(Db1, <<"a">>, [])),

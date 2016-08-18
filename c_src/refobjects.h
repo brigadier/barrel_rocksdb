@@ -27,6 +27,7 @@
 #include <list>
 
 #include "rocksdb/db.h"
+#include "rocksdb/utilities/db_ttl.h"
 #include "rocksdb/write_batch.h"
 #include "rocksdb/transaction_log.h"
 
@@ -177,7 +178,7 @@ private:
 class DbObject : public ErlRefObject
 {
 public:
-    rocksdb::DB* m_Db;                                   // NULL or rocksdb database object
+    rocksdb::DBWithTTL* m_Db;                                   // NULL or rocksdb database object
     rocksdb::Options *m_DbOptions;
 
     Mutex m_ItrMutex;                         //!< mutex protecting m_ItrList
@@ -194,7 +195,7 @@ protected:
     static ErlNifResourceType* m_Db_RESOURCE;
 
 public:
-    DbObject(rocksdb::DB * DbPtr, rocksdb::Options * Options); // Open with default CF
+    DbObject(rocksdb::DBWithTTL * DbPtr, rocksdb::Options * Options); // Open with default CF
 
 
     virtual ~DbObject();
@@ -223,7 +224,7 @@ public:
 
     static void CreateDbObjectType(ErlNifEnv * Env);
 
-    static DbObject * CreateDbObject(rocksdb::DB * Db, rocksdb::Options * Options);
+    static DbObject * CreateDbObject(rocksdb::DBWithTTL * Db, rocksdb::Options * Options);
 
     static DbObject * RetrieveDbObject(ErlNifEnv * Env, const ERL_NIF_TERM & DbTerm);
 

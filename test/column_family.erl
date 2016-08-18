@@ -9,10 +9,11 @@
 basic_test() ->
     erocksdb:destroy("test.db", []),
     ColumnFamilies = [{"default", []}],
-    {ok, Db, Handles1} = erocksdb:open_with_cf("test.db", [{create_if_missing, true}], ColumnFamilies),
+    {ok, Db, Handles1} = erocksdb:open_with_cf("test.db",
+        [{create_if_missing, true}, {create_missing_column_families, true}], ColumnFamilies, [10000]),
     ?assertEqual(1, length(Handles1)),
     ?assertEqual({ok, ["default"]}, erocksdb:list_column_families("test.db", [])),
-    {ok, Handle} = erocksdb:create_column_family(Db, "test", []),
+    {ok, Handle} = erocksdb:create_column_family(Db, "test", [], 10000),
 
     ?assertEqual({ok, ["default", "test"]}, erocksdb:list_column_families("test.db", [])),
 
@@ -25,16 +26,18 @@ basic_test() ->
 column_order_test() ->
     os:cmd("rm -rf test.db"),
     ColumnFamilies = [{"default", []}],
-    {ok, Db, Handles1} = erocksdb:open_with_cf("test.db", [{create_if_missing, true}], ColumnFamilies),
+    {ok, Db, Handles1} = erocksdb:open_with_cf("test.db",
+        [{create_if_missing, true}, {create_missing_column_families, true}], ColumnFamilies, [10000]),
     ?assertEqual(1, length(Handles1)),
     ?assertEqual({ok, ["default"]}, erocksdb:list_column_families("test.db", [])),
-    {ok, Handle} = erocksdb:create_column_family(Db, "test", []),
+    {ok, Handle} = erocksdb:create_column_family(Db, "test", [], 10000),
     erocksdb:close(Db),
 
     ?assertEqual({ok, ["default", "test"]}, erocksdb:list_column_families("test.db", [])),
 
     ColumnFamilies2 = [{"default", []}, {"test", []}],
-    {ok, Db2, Handles2} = erocksdb:open_with_cf("test.db", [{create_if_missing, true}], ColumnFamilies2),
+    {ok, Db2, Handles2} = erocksdb:open_with_cf("test.db",
+        [{create_if_missing, true}, {create_missing_column_families, true}], ColumnFamilies2, [10000, 2000]),
 
     [_DefaultH, TestH] = Handles2,
     ok = erocksdb:drop_column_family(TestH),
@@ -45,12 +48,14 @@ column_order_test() ->
 try_remove_default_test() ->
     os:cmd("rm -rf test.db"),
     ColumnFamilies = [{"default", []}],
-    {ok, Db, [DefaultH]} = erocksdb:open_with_cf("test.db", [{create_if_missing, true}], ColumnFamilies),
+    {ok, Db, [DefaultH]} = erocksdb:open_with_cf("test.db",
+        [{create_if_missing, true}, {create_missing_column_families, true}], ColumnFamilies, [10000]),
     {error, _} = erocksdb:drop_column_family(DefaultH),
-    {ok, _Handle} = erocksdb:create_column_family(Db, "test", []),
+    {ok, _Handle} = erocksdb:create_column_family(Db, "test", [], 10000),
     erocksdb:close(Db),
     ColumnFamilies2 = [{"default", []}, {"test", []}],
-    {ok, Db2, [DefaultH2, _]} = erocksdb:open_with_cf("test.db", [{create_if_missing, true}], ColumnFamilies2),
+    {ok, Db2, [DefaultH2, _]} = erocksdb:open_with_cf("test.db",
+        [{create_if_missing, true}, {create_missing_column_families, true}], ColumnFamilies2, [10000, 20000]),
     {error, _} = erocksdb:drop_column_family(DefaultH2),
     erocksdb:close(Db2),
     ok.
@@ -59,7 +64,8 @@ try_remove_default_test() ->
 basic_kvs_test() ->
     os:cmd("rm -rf test.db"),
     ColumnFamilies = [{"default", []}],
-    {ok, Db, [DefaultH]} = erocksdb:open_with_cf("test.db", [{create_if_missing, true}], ColumnFamilies),
+    {ok, Db, [DefaultH]} = erocksdb:open_with_cf("test.db",
+        [{create_if_missing, true}, {create_missing_column_families, true}], ColumnFamilies, [10000]),
     ok = erocksdb:put(Db, DefaultH, <<"a">>, <<"a1">>, []),
     {ok,  <<"a1">>} = erocksdb:get(Db, DefaultH, <<"a">>, []),
     ok = erocksdb:put(Db, DefaultH, <<"b">>, <<"b1">>, []),
@@ -67,7 +73,7 @@ basic_kvs_test() ->
     ok = erocksdb:delete(Db, DefaultH, <<"b">>, []),
     not_found = erocksdb:get(Db, DefaultH, <<"b">>, []),
 
-    {ok, TestH} = erocksdb:create_column_family(Db, "test", []),
+    {ok, TestH} = erocksdb:create_column_family(Db, "test", [], 10000),
     erocksdb:put(Db, TestH, <<"a">>, <<"a2">>, []),
     {ok,  <<"a1">>} = erocksdb:get(Db, DefaultH, <<"a">>, []),
     {ok,  <<"a2">>} = erocksdb:get(Db, TestH, <<"a">>, []),
@@ -78,8 +84,9 @@ basic_kvs_test() ->
 
 iterators_test() ->
     os:cmd("rm -rf ltest"),  % NOTE
-    {ok, Ref, [DefaultH]} = erocksdb:open_with_cf("ltest", [{create_if_missing, true}], [{"default", []}]),
-    {ok, TestH} = erocksdb:create_column_family(Ref, "test", []),
+    {ok, Ref, [DefaultH]} = erocksdb:open_with_cf("ltest",
+        [{create_if_missing, true}, {create_missing_column_families, true}], [{"default", []}], [10000]),
+    {ok, TestH} = erocksdb:create_column_family(Ref, "test", [], 10000),
     try
         erocksdb:put(Ref, DefaultH, <<"a">>, <<"x">>, []),
         erocksdb:put(Ref, DefaultH, <<"b">>, <<"y">>, []),
@@ -100,8 +107,9 @@ iterators_test() ->
 
 iterators_drop_column_test() ->
     os:cmd("rm -rf ltest"),  % NOTE
-    {ok, Ref, [DefaultH]} = erocksdb:open_with_cf("ltest", [{create_if_missing, true}], [{"default", []}]),
-    {ok, TestH} = erocksdb:create_column_family(Ref, "test", []),
+    {ok, Ref, [DefaultH]} = erocksdb:open_with_cf("ltest",
+        [{create_if_missing, true}, {create_missing_column_families, true}], [{"default", []}], [10000]),
+    {ok, TestH} = erocksdb:create_column_family(Ref, "test", [], 10000),
     try
         erocksdb:put(Ref, DefaultH, <<"a">>, <<"x">>, []),
         erocksdb:put(Ref, DefaultH, <<"b">>, <<"y">>, []),

@@ -147,12 +147,12 @@ check() ->
 
 open() ->
     {ok, Ref} = erocksdb:open(?COMMON_INSTANCE_DIR,
-                              [{create_if_missing, true}], []),
+                              [{create_if_missing, true}], [], 10000),
     Ref.
 
 failed_open() ->
     {error, {db_open, _}} = erocksdb:open(?COMMON_INSTANCE_DIR,
-                                          [{create_if_missing, true}], []),
+                                          [{create_if_missing, true}], [], 10000),
     ok.
 
 write(N, DB) ->

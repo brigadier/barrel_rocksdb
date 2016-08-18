@@ -41,7 +41,7 @@ prop_put_delete() ->
       begin
         ?cmd("rm -rf /tmp/erocksdb.putdelete.qc"),
         {ok, Ref} = erocksdb:open("/tmp/erocksdb.putdelete.qc",
-          [{create_if_missing, true}], []),
+          [{create_if_missing, true}], [], 10000),
         Model = apply_kv_ops(Ops, Ref, []),
 
         %% Valdiate that all deleted values return not_found

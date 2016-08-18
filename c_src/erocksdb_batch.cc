@@ -24,6 +24,7 @@
 #include "erocksdb.h"
 
 #include "rocksdb/db.h"
+#include "rocksdb/utilities/db_ttl.h"
 #include "rocksdb/env.h"
 #include "rocksdb/write_batch.h"
 

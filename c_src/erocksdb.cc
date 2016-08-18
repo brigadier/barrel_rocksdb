@@ -43,6 +43,10 @@
 #include "rocksdb/filter_policy.h"
 #include "rocksdb/slice_transform.h"
 #include "rocksdb/utilities/checkpoint.h"
+<<<<<<< HEAD
+=======
+#include "rocksdb/utilities/db_ttl.h"
+>>>>>>> temp
 
 #ifndef INCL_REFOBJECTS_H
     #include "refobjects.h"
@@ -62,8 +66,8 @@ static ErlNifFunc nif_funcs[] =
 {
     // db operations
     {"close", 1, erocksdb::Close, ERL_NIF_DIRTY_JOB_IO_BOUND},
-    {"open", 2, erocksdb::Open, ERL_NIF_DIRTY_JOB_IO_BOUND},
-    {"open_with_cf", 3, erocksdb::OpenWithCf, ERL_NIF_DIRTY_JOB_IO_BOUND},
+    {"open", 3, erocksdb::Open, ERL_NIF_DIRTY_JOB_IO_BOUND},
+    {"open_with_cf", 4, erocksdb::OpenWithCf, ERL_NIF_DIRTY_JOB_IO_BOUND},
     {"status", 2, erocksdb::Status},
     {"destroy", 2, erocksdb::Destroy, ERL_NIF_DIRTY_JOB_IO_BOUND},
     {"repair", 2, erocksdb::Repair, ERL_NIF_DIRTY_JOB_IO_BOUND},
@@ -82,7 +86,7 @@ static ErlNifFunc nif_funcs[] =
 
     // column families
     {"list_column_families", 2, erocksdb::ListColumnFamilies, ERL_NIF_DIRTY_JOB_IO_BOUND},
-    {"create_column_family", 3, erocksdb::CreateColumnFamily, ERL_NIF_DIRTY_JOB_IO_BOUND},
+    {"create_column_family", 4, erocksdb::CreateColumnFamily, ERL_NIF_DIRTY_JOB_IO_BOUND},
     {"drop_column_family", 1, erocksdb::DropColumnFamily, ERL_NIF_DIRTY_JOB_IO_BOUND},
 
     // snaptshot operation
@@ -931,6 +935,7 @@ ERL_NIF_TERM parse_cf_option(ErlNifEnv* env, ERL_NIF_TERM item, rocksdb::ColumnF
     return erocksdb::ATOM_OK;
 }
 
+
 ERL_NIF_TERM
 parse_cf_descriptor(ErlNifEnv* env, ERL_NIF_TERM item,
                     std::vector<rocksdb::ColumnFamilyDescriptor>& column_families)
@@ -965,7 +970,8 @@ Open(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     char dir[4096];
     DbObject * db_ptr;
-    rocksdb::DB *db(0);
+    rocksdb::DBWithTTL *db(0);
+    int ttl;
     unsigned int dir_len;
 
     if(!enif_get_list_length(env, argv[0], &dir_len))
@@ -974,15 +980,16 @@ Open(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     }
 
     if(!enif_get_string(env, argv[0], dir, sizeof(dir), ERL_NIF_LATIN1) ||
-       !enif_is_list(env, argv[1]))
+       !enif_is_list(env, argv[1]) ||
+       !enif_get_int(env, argv[2], &ttl))
     {
         return enif_make_badarg(env);
     }
 
-    if((argc == 3) && !enif_is_list(env, argv[2]))
-    {
-        return enif_make_badarg(env);
-    }
+//    if((argc == 3) && !enif_is_list(env, argv[2]))
+//    {
+//        return enif_make_badarg(env);
+//    }
 
     // parse main db options
     rocksdb::Options *opts = new rocksdb::Options;
@@ -995,7 +1002,7 @@ Open(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         opts->create_if_missing = true;
     }
 
-    rocksdb::Status status = rocksdb::DB::Open(*opts, dir, &db);
+    rocksdb::Status status = rocksdb::DBWithTTL::Open(*opts, dir, &db, ttl);
     if(!status.ok())
         return error_tuple(env, ATOM_ERROR_DB_OPEN, status);
 
@@ -1012,11 +1019,12 @@ OpenWithCf(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     char db_name[4096];
     DbObject * db_ptr;
-    rocksdb::DB *db(0);
+    rocksdb::DBWithTTL *db(0);
+//    ErlNifSInt64 ttl;
 
 
     if(!enif_get_string(env, argv[0], db_name, sizeof(db_name), ERL_NIF_LATIN1) ||
-       !enif_is_list(env, argv[1]) || !enif_is_list(env, argv[2]))
+       !enif_is_list(env, argv[1]) || !enif_is_list(env, argv[2]) || !enif_is_list(env, argv[3]))
     {
         return enif_make_badarg(env);
     }
@@ -1037,8 +1045,23 @@ OpenWithCf(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         }
     }
 
+
+
+    std::vector<int32_t> ttls;
+    tail = argv[3];
+    while(enif_get_list_cell(env, tail, &head, &tail))
+    {
+        int ttl;
+        if (enif_get_int(env, head, &ttl)) {
+            ttls.push_back(ttl);
+
+        } else {
+            return enif_make_badarg(env);
+        }
+    }
+
     std::vector<rocksdb::ColumnFamilyHandle*> handles;
-    rocksdb::Status status = rocksdb::DB::Open(*opts, db_name, column_families, &handles, &db);
+    rocksdb::Status status = rocksdb::DBWithTTL::Open(*opts, db_name, column_families, &handles, &db, ttls);
 
     if(!status.ok())
         return error_tuple(env, ATOM_ERROR_DB_OPEN, status);
@@ -1052,7 +1075,7 @@ OpenWithCf(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
     ERL_NIF_TERM cf_list = enif_make_list(env, 0);
     try {
-        for (int i = 0; i < num_cols; ++i)
+        for (unsigned int i = 0; i < num_cols; ++i)
         {
             ColumnFamilyObject * handle_ptr;
             handle_ptr = ColumnFamilyObject::CreateColumnFamilyObject(db_ptr, handles[i]);

@@ -33,6 +33,7 @@
 
 
 #include "rocksdb/db.h"
+#include "rocksdb/utilities/db_ttl.h"
 #include "rocksdb/slice_transform.h"
 
 ERL_NIF_TERM error_einval(ErlNifEnv* env);
