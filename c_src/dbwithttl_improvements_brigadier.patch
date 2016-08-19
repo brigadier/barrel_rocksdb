@@ -1,0 +1,135 @@
+Index: include/rocksdb/utilities/db_ttl.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- include/rocksdb/utilities/db_ttl.h	(revision 051c88dd79f35f73cf60686500b0972d386411e7)
++++ include/rocksdb/utilities/db_ttl.h	(revision 1e5ef5ea268281893b22ac40633e4c7e5e004ac3)
+@@ -60,6 +60,9 @@
+                      DBWithTTL** dbptr, std::vector<int32_t> ttls,
+                      bool read_only = false);
+ 
++  virtual Status SetColumnFamilyTTL(ColumnFamilyHandle* column_family, int32_t ttl) = 0;
++  virtual Status GetColumnFamilyTTL(ColumnFamilyHandle* column_family, int32_t* ttl) = 0;
++
+  protected:
+   explicit DBWithTTL(DB* db) : StackableDB(db) {}
+ };
+Index: utilities/ttl/db_ttl_impl.cc
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- utilities/ttl/db_ttl_impl.cc	(revision 051c88dd79f35f73cf60686500b0972d386411e7)
++++ utilities/ttl/db_ttl_impl.cc	(revision 1e5ef5ea268281893b22ac40633e4c7e5e004ac3)
+@@ -298,5 +298,51 @@
+   return new TtlIterator(db_->NewIterator(opts, column_family));
+ }
+ 
++Status DBWithTTLImpl::NewIterators(
++      const ReadOptions& options,
++      const std::vector<ColumnFamilyHandle*>& column_families,
++      std::vector<Iterator*>* iterators) {
++
++    std::vector<Iterator*> tempiterators;
++    Status result = db_->NewIterators(options, column_families, &tempiterators);
++    if (result == Status::OK()) {
++        for (auto it = begin (tempiterators); it != end (tempiterators); ++it) {
++            iterators->push_back(new TtlIterator(*it));
++        }
++    }
++    return result;
++}
++
++
++Status DBWithTTLImpl::GetColumnFamilyTTL(ColumnFamilyHandle* column_family, int32_t* ttl) {
++    auto cfh = reinterpret_cast<ColumnFamilyHandleImpl*>(column_family);
++    auto cfd = cfh->cfd();
++    if (cfd->ioptions()->compaction_filter) {
++        TtlCompactionFilter const * cf = reinterpret_cast<TtlCompactionFilter const *>(
++                                                                cfd->ioptions()->compaction_filter);
++        *ttl = cf->GetTTL();
++        return Status::OK();
++    } else {
++        TtlCompactionFilterFactory* cf = reinterpret_cast<TtlCompactionFilterFactory*>(
++                                                                cfd->ioptions()->compaction_filter_factory);
++        *ttl = cf->GetTTL();
++        return Status::OK();
++    }
++
++}
++
++Status DBWithTTLImpl::SetColumnFamilyTTL(ColumnFamilyHandle* column_family, int32_t ttl) {
++    auto cfh = reinterpret_cast<ColumnFamilyHandleImpl*>(column_family);
++    auto cfd = cfh->cfd();
++    if (cfd->ioptions()->compaction_filter) {
++        return Status::InvalidArgument(
++            "can't change TTL for column families with non-default compaction filter.");
++    } else {
++        TtlCompactionFilterFactory* cf = reinterpret_cast<TtlCompactionFilterFactory*>(
++                                                                cfd->ioptions()->compaction_filter_factory);
++        return cf->SetTTL(ttl);
++    }
++}
++
+ }  // namespace rocksdb
+ #endif  // ROCKSDB_LITE
+Index: utilities/ttl/db_ttl_impl.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- utilities/ttl/db_ttl_impl.h	(revision 051c88dd79f35f73cf60686500b0972d386411e7)
++++ utilities/ttl/db_ttl_impl.h	(revision 1e5ef5ea268281893b22ac40633e4c7e5e004ac3)
+@@ -77,6 +77,17 @@
+   virtual Iterator* NewIterator(const ReadOptions& opts,
+                                 ColumnFamilyHandle* column_family) override;
+ 
++
++  using StackableDB::NewIterators;
++  virtual Status NewIterators(
++      const ReadOptions& options,
++      const std::vector<ColumnFamilyHandle*>& column_families,
++      std::vector<Iterator*>* iterators) override;
++
++  virtual Status SetColumnFamilyTTL(ColumnFamilyHandle* column_family, int32_t ttl) override;
++
++  virtual Status GetColumnFamilyTTL(ColumnFamilyHandle* column_family, int32_t* ttl) override;
++
+   virtual DB* GetBaseDB() override { return db_; }
+ 
+   static bool IsStale(const Slice& value, int32_t ttl, Env* env);
+@@ -176,6 +187,10 @@
+     return false;
+   }
+ 
++  int32_t GetTTL() const {
++    return ttl_;
++  }
++
+   virtual const char* Name() const override { return "Delete By TTL"; }
+ 
+  private:
+@@ -205,9 +220,22 @@
+         ttl_, env_, nullptr, std::move(user_comp_filter_from_factory)));
+   }
+ 
++
++  int32_t GetTTL() {
++    return ttl_;
++  }
++
++
++  Status SetTTL(int32_t ttl) {
++    ttl_ = ttl;
++    return Status::OK();
++  }
++
+   virtual const char* Name() const override {
+     return "TtlCompactionFilterFactory";
+   }
++
++
+ 
+  private:
+   int32_t ttl_;

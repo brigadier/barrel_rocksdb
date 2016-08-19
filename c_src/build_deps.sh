@@ -113,7 +113,7 @@ case "$1" in
 
         sh $SCRIPT get-deps
         if [ ! -f rocksdb/librocksdb.a ]; then
-            grep -q NewIterators rocksdb/utilities/ttl/db_ttl_impl.cc || patch -p1 -f -d rocksdb/utilities/ttl/ < ttl_iterators.patch
+            grep -q NewIterators rocksdb/utilities/ttl/db_ttl_impl.cc || patch -p0 -f -d rocksdb/ < dbwithttl_improvements_brigadier.patch
             (cd rocksdb && export CXXFLAGS="-static-libstdc++  -fPIC" && PORTABLE=1 $MAKE static_lib)
         fi
         ;;
