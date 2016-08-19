@@ -25,7 +25,8 @@
 -module(erocksdb).
 
 -export([open/3, open/4, open_with_cf/4, close/1]).
--export([list_column_families/2,create_column_family/4, drop_column_family/1]).
+-export([list_column_families/2,create_column_family/4, drop_column_family/1,
+    set_column_family_ttl/2, compact_column_family/1, get_column_family_ttl/1]).
 -export([snapshot/1, release_snapshot/1]).
 -export([put/4, put/5, delete/3, delete/4, write/3, get/3, get/4]).
 -export([iterator/2, iterator/3, iterators/3, iterators/4, iterator_move/2, iterator_close/1]).
@@ -594,6 +595,20 @@ status(_DBHandle, _Property) ->
                                             Property::binary()).
 status(_DBHandle, _CFHandle, _Property) ->
     {error, not_implemeted}.
+
+
+
+%% Set TTL for column family
+-spec(set_column_family_ttl(CFHandle, TTL) ->
+             ok | {error, any()} when  CFHandle::cf_handle(), TTL::integer()).
+set_column_family_ttl(_CFHandle, _TTL) ->
+    erlang:nif_error({error, not_loaded}).
+
+get_column_family_ttl(_CFHandle) ->
+    erlang:nif_error({error, not_loaded}).
+
+compact_column_family(_CFHandle) ->
+    erlang:nif_error({error, not_loaded}).
 
 %% ===================================================================
 %% Internal functions

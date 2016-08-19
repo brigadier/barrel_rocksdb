@@ -137,4 +137,65 @@ DropColumnFamily(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 }   // drop_column_family
 
 
+ERL_NIF_TERM
+SetColumnFamilyTTL(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    int ttl;
+    ReferencePtr<ColumnFamilyObject> cf_ptr;
+    if(!enif_get_cf(env, argv[0], &cf_ptr) || !enif_get_int(env, argv[1], &ttl))
+        return enif_make_badarg(env);
+
+    // release snapshot object
+    ColumnFamilyObject* cf = cf_ptr.get();
+    rocksdb::Status status = cf->m_DbPtr->m_Db->SetColumnFamilyTTL(cf->m_ColumnFamily, ttl);
+    if(!status.ok())
+        return error_tuple(env, ATOM_ERROR, status);
+    return ATOM_OK;
+}   //
+
+
+ERL_NIF_TERM
+GetColumnFamilyTTL(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    int ttl;
+    ReferencePtr<ColumnFamilyObject> cf_ptr;
+    if(!enif_get_cf(env, argv[0], &cf_ptr))
+        return enif_make_badarg(env);
+
+    // release snapshot object
+    ColumnFamilyObject* cf = cf_ptr.get();
+    rocksdb::Status status = cf->m_DbPtr->m_Db->GetColumnFamilyTTL(cf->m_ColumnFamily, &ttl);
+    if(!status.ok())
+        return error_tuple(env, ATOM_ERROR, status);
+    return enif_make_tuple2(env, ATOM_OK, enif_make_int(env, ttl));
+}   //
+
+
+
+  //    db->CompactRange(options, nullptr, nullptr);
+  // Note that after the entire database is compacted, all data are pushed
+  // down to the last level containing any data. If the total data size after
+  // compaction is reduced, that level might not be appropriate for hosting all
+  // the files. In this case, client could set options.change_level to true, to
+  // move the files back to the minimum level capable of holding the data set
+//  // or a given level (specified by non-negative options.target_level).
+//  virtual Status CompactRange(const CompactRangeOptions& options,
+//                              ColumnFamilyHandle* column_family,
+//                              const Slice* begin, const Slice* end) = 0;
+ERL_NIF_TERM
+CompactColumnFamily(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    ReferencePtr<ColumnFamilyObject> cf_ptr;
+    if(!enif_get_cf(env, argv[0], &cf_ptr))
+        return enif_make_badarg(env);
+
+    // release snapshot object
+    ColumnFamilyObject* cf = cf_ptr.get();
+    rocksdb::Status status = cf->m_DbPtr->m_Db->CompactRange(rocksdb::CompactRangeOptions(), cf->m_ColumnFamily, nullptr, nullptr);
+    if(!status.ok())
+        return error_tuple(env, ATOM_ERROR, status);
+    return ATOM_OK;
+}   //
+
+
 }

@@ -86,6 +86,12 @@ static ErlNifFunc nif_funcs[] =
     {"list_column_families", 2, erocksdb::ListColumnFamilies, ERL_NIF_DIRTY_JOB_IO_BOUND},
     {"create_column_family", 4, erocksdb::CreateColumnFamily, ERL_NIF_DIRTY_JOB_IO_BOUND},
     {"drop_column_family", 1, erocksdb::DropColumnFamily, ERL_NIF_DIRTY_JOB_IO_BOUND},
+    {"set_column_family_ttl", 2, erocksdb::SetColumnFamilyTTL},
+    {"get_column_family_ttl", 1, erocksdb::GetColumnFamilyTTL},
+
+
+    {"compact_column_family", 1, erocksdb::CompactColumnFamily, ERL_NIF_DIRTY_JOB_IO_BOUND},
+
 
     // snaptshot operation
     {"snapshot", 1, erocksdb::GetSnapshot, ERL_NIF_DIRTY_JOB_CPU_BOUND},
