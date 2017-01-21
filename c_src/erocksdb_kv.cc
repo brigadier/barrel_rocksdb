@@ -233,6 +233,7 @@ Get(
         return enif_make_badarg(env);
     }
 
+
     rocksdb::ReadOptions *opts = new rocksdb::ReadOptions();
     fold(env, argv[i+1], parse_read_option, *opts);
 
@@ -241,8 +242,10 @@ Get(
     if(argc==4)
     {
         ReferencePtr<ColumnFamilyObject> cf_ptr;
-        if(!enif_get_cf(env, argv[1], &cf_ptr))
+        if(!enif_get_cf(env, argv[1], &cf_ptr)) {
+            delete opts;
             return enif_make_badarg(env);
+        }
 
         status = db_ptr->m_Db->Get(*opts, cf_ptr->m_ColumnFamily, key, &value);
     }
@@ -250,6 +253,8 @@ Get(
     {
         status = db_ptr->m_Db->Get(*opts, key, &value);
     }
+
+    delete opts;
 
     if (!status.ok())
     {
@@ -293,8 +298,10 @@ Put(
     if(argc==5)
     {
         ReferencePtr<ColumnFamilyObject> cf_ptr;
-        if(!enif_get_cf(env, argv[1], &cf_ptr))
+        if(!enif_get_cf(env, argv[1], &cf_ptr)) {
+            delete opts;
             return enif_make_badarg(env);
+        }
 
         status = db_ptr->m_Db->Put(*opts, cf_ptr->m_ColumnFamily, key, value);
     }
@@ -302,6 +309,8 @@ Put(
     {
         status = db_ptr->m_Db->Put(*opts, key, value);
     }
+
+    delete opts;
 
     if(status.ok())
     {
@@ -338,8 +347,10 @@ Delete(
     if(argc==4)
     {
         ReferencePtr<ColumnFamilyObject> cf_ptr;
-        if(!enif_get_cf(env, argv[1], &cf_ptr))
+        if(!enif_get_cf(env, argv[1], &cf_ptr)) {
+            delete opts;
             return enif_make_badarg(env);
+        }
 
         status = db_ptr->m_Db->Delete(*opts, cf_ptr->m_ColumnFamily, key);
     }
@@ -347,6 +358,8 @@ Delete(
     {
         status = db_ptr->m_Db->Delete(*opts, key);
     }
+
+    delete opts;
 
     if(status.ok())
     {
