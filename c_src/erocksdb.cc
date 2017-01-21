@@ -1007,6 +1007,9 @@ Open(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     }
 
     rocksdb::Status status = rocksdb::DBWithTTL::Open(*opts, dir, &db, ttl);
+
+    delete opts;
+
     if(!status.ok())
         return error_tuple(env, ATOM_ERROR_DB_OPEN, status);
 
@@ -1034,8 +1037,6 @@ OpenWithCf(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     }
 
     // parse main db options
-    rocksdb::Options *opts = new rocksdb::Options;
-    fold(env, argv[1], parse_db_option, *opts);
 
     std::vector<rocksdb::ColumnFamilyDescriptor> column_families;
 
@@ -1064,8 +1065,15 @@ OpenWithCf(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         }
     }
 
+
+    rocksdb::Options *opts = new rocksdb::Options;
+    fold(env, argv[1], parse_db_option, *opts);
+
+
     std::vector<rocksdb::ColumnFamilyHandle*> handles;
     rocksdb::Status status = rocksdb::DBWithTTL::Open(*opts, db_name, column_families, &handles, &db, ttls);
+
+    delete opts;
 
     if(!status.ok())
         return error_tuple(env, ATOM_ERROR_DB_OPEN, status);
